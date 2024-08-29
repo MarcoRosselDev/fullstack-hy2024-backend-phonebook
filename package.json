@@ -1,0 +1,17 @@
+{
+  "name": "backend-phonebook",
+  "version": "1.0.0",
+  "description": "helsinki university fullstack open course",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express"
+  ],
+  "author": "Marco Rossel",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
