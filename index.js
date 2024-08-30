@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 let persons = [
@@ -50,18 +52,23 @@ app.post('/api/persons', (req, res) => {
     })
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  }
+  })
+  //persons = persons.concat(person)
 
-  persons = persons.concat(person)
-
-  res.json(person)
+  person.save().then(savedNote => {
+    res.status(201).json(savedNote)
+  }).catch(err =>{
+    console.log(`No se pudo guardar la persona, el msj de error es el siguiente : ${err}`)
+    res.status(405).end()
+  })
+  //res.json(person)
 })
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then(notes => res.status(200).json(notes))
+  //res.json(persons)
 })
 app.get('/info', (req, res) => {
   const fecha = new Date()
@@ -71,11 +78,19 @@ app.get('/info', (req, res) => {
   `)
 })
 app.get('/api/persons/:id', (req, res) =>{
-  const id = Number(req.params.id)
-  const person = persons.find(p => p.id === id)
-  person
+  //const id = Number(req.params.id)
+  //const person = persons.find(p => p.id === id)
+  /* person
   ? res.json(person) 
-  : res.status(404).end()
+  : res.status(404).end() */
+
+  Person.findById(req.params.id).then(pers => {
+    res.status(200).json(pers)
+  }).catch(err =>{
+    console.log(`No se encontro el id : ${req.params.id}, el msj de error es el siguiente : ${err}`)
+    res.status(404).end()
+  })
+
 })
 app.delete('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id)
