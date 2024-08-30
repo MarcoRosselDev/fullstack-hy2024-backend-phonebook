@@ -5,28 +5,6 @@ const cors = require('cors')
 const Person = require('./models/person')
 
 const app = express()
-/* let persons = [
-  { 
-    "id": 1,
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": 2,
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": 3,
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": 4,
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-] */
 app.use(cors())
 app.use(express.json())
 //app.use(morgan('combined'))
@@ -54,38 +32,31 @@ app.get('/api/persons/:id', (req, res) =>{
   }).catch(error => next(error))
 
 })
-app.post('/api/persons', (req, res) => {
+// number validation
+const regex = /^(\d{2}|\d{3})-(\d{7}|\d{8})$/
+const testInput = str => regex.test(str)
+
+app.post('/api/persons', (req, res, next) => {
   const body = req.body
-  if (!body.name) {
-    return res.status(400).json({ 
-      error: 'name missing' 
-    })
-  } else if (!body.number) {
-    return res.status(400).json({ 
-      error: 'number missing' 
-    })
-  } else {
-    Person.findOne({ name : body.name }).then(result => {
-      console.log(result)
-      if (result) {
-        return res.status(400).json({ 
-          error: 'name must be unique'
-        })
-      }
+  
+  Person.findOne({ name : body.name }).then(result => {
+    if (result) {
+      return res.status(400).json({ 
+        error: 'name must be unique'
+      })
+    }
+    if(testInput(body.number)){
       const person = new Person({
         name: body.name,
         number: body.number,
       })
-      //persons = persons.concat(person)
-    
-      person.save().then(savedNote => {
-        res.status(201).json(savedNote)
-      }).catch(err =>{
-        console.log(`No se pudo guardar la persona, el msj de error es el siguiente : ${err}`)
-        res.status(405).end()
-      })
-    })
-  }
+      person.save()
+      .then(savedNote => res.status(201).json(savedNote))
+      .catch(error => next(error))
+    } else{
+      return res.status(400).json({error: 'Invalid phone number format'})
+    }
+  })
 })
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
@@ -96,35 +67,31 @@ app.delete('/api/persons/:id', (req, res, next) => {
 })
 app.put('/api/persons/:id', (req, res, next) =>{
   const body = req.body
-
-  const num = {
-    name: body.name,
-    number: body.number,
-  }
-  console.log(num, body.name, body.number, req.params.id);
+  if (testInput(body.number)) {
+    const num = {
+      name: body.name,
+      number: body.number,
+    }
   
-  Person.findByIdAndUpdate(req.params.id, num, { new: true })
-  .then(updatedNote =>{
-    res.json(updatedNote)
-  })
-  .catch(error => {
-    console.log(error, 'from put');
-    
-    next(error)
-  })
-    
+    Person.findByIdAndUpdate(req.params.id, num, { new: true })
+    .then(updatedNote => res.json(updatedNote))
+    .catch(error => next(error))
+  } else{
+    return res.status(400).json({error: 'Invalid phone number format'})
+  }
+
 })
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: 'unknown endpoint' })
 }
 app.use(unknownEndpoint)
 const errorHandler = (error, req, res, next) => {
-  console.error(error.message)
 
   if (error.name === 'CastError') {
     return res.status(400).send({ error: 'malformatted id' })
-  } 
-
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
   next(error)
 }
 app.use(errorHandler)
