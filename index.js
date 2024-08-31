@@ -22,7 +22,7 @@ app.get('/info', (req, res) => {
     `)  
   })
 })
-app.get('/api/persons/:id', (req, res) =>{
+app.get('/api/persons/:id', (req, res, next) =>{
   Person.findById(req.params.id).then(pers => {
     if(pers) {
       res.status(200).json(pers)
