@@ -3,11 +3,12 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 
 mongoose.set('strictQuery', false)
-mongoose.connect(URL)
-  .then(result => {
+mongoose
+  .connect(URL)
+  .then(() => {
     console.log('connected to MongoDB')
   })
-  .catch(error => {
+  .catch((error) => {
     console.log('error connecting to MongoDB:', error.message)
   })
 
@@ -20,12 +21,12 @@ const numberSchema = new mongoose.Schema({
   name: {
     type: String,
     minLength: 3,
-    required: true
+    required: true,
   },
   number: {
     type: String,
     minLength: 8,
-    required: true
+    required: true,
   },
 })
 
@@ -34,7 +35,7 @@ numberSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
     delete returnedObject.__v
-  }
+  },
 })
 
 module.exports = mongoose.model('Person', numberSchema)

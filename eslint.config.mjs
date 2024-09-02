@@ -1,15 +1,40 @@
-import globals from "globals";
-import js from "@eslint/js";
+import globals from 'globals'
+import pluginJs from '@eslint/js'
+import stylisticJs from '@stylistic/eslint-plugin-js'
 
 export default [
-  js.configs.recommended,
-  {files: ["**/*.js"], languageOptions: {sourceType: "commonjs"}},
-  {languageOptions: { globals: globals.browser }},
-  {rules: {
-    "no-unused-vars": "warn",
-    "no-undef": "warn",
-  }},
+  { files: ['**/*.js'], languageOptions: { sourceType: 'commonjs' } },
   {
-    ignores: ["dist"]
-  }
-];
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  pluginJs.configs.recommended,
+  {
+    plugins: {
+      '@stylistic/js': stylisticJs,
+    },
+    rules: {
+      indent: ['error', 2],
+      '@stylistic/js/indent': ['error', 2],
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
+      '@stylistic/js/quotes': ['error', 'single'],
+      '@stylistic/js/semi': ['error', 'never'],
+      eqeqeq: 'error',
+      'no-trailing-spaces': 'error',
+      'object-curly-spacing': ['error', 'always'],
+      'arrow-spacing': ['error', { before: true, after: true }],
+      //'no-console': 'error',
+      'no-console': 'off',
+    },
+  },
+  {
+    ignores: [
+      '!node_modules/', // unignore `node_modules/` directory
+      'node_modules/*',
+      'dist/**',
+    ],
+  },
+]

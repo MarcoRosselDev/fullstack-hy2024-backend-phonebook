@@ -19,10 +19,10 @@ app.get('/info', (req, res) => {
     res.send(`
       <p>Phonebook has info for ${length} people</p>
       <p>${fecha.toString()}</p>
-    `)  
+    `)
   })
 })
-app.get('/api/persons/:id', (req, res, next) =>{
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id).then(pers => {
     if(pers) {
       res.status(200).json(pers)
@@ -38,10 +38,10 @@ const testInput = str => regex.test(str)
 
 app.post('/api/persons', (req, res, next) => {
   const body = req.body
-  
+
   Person.findOne({ name : body.name }).then(result => {
     if (result) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'name must be unique'
       })
     }
@@ -51,33 +51,33 @@ app.post('/api/persons', (req, res, next) => {
         number: body.number,
       })
       person.save()
-      .then(savedNote => res.status(201).json(savedNote))
-      .catch(error => next(error))
+        .then(savedNote => res.status(201).json(savedNote))
+        .catch(error => next(error))
     } else{
-      return res.status(400).json({error: 'Invalid phone number format'})
+      return res.status(400).json({ error: 'Invalid phone number format' })
     }
   })
 })
 app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
-  .then(result => {
-    res.status(204).json(result)
-  })
-  .catch(error => next(error))
+    .then(result => {
+      res.status(204).json(result)
+    })
+    .catch(error => next(error))
 })
-app.put('/api/persons/:id', (req, res, next) =>{
+app.put('/api/persons/:id', (req, res, next) => {
   const body = req.body
   if (testInput(body.number)) {
     const num = {
       name: body.name,
       number: body.number,
     }
-  
+
     Person.findByIdAndUpdate(req.params.id, num, { new: true })
-    .then(updatedNote => res.json(updatedNote))
-    .catch(error => next(error))
+      .then(updatedNote => res.json(updatedNote))
+      .catch(error => next(error))
   } else{
-    return res.status(400).json({error: 'Invalid phone number format'})
+    return res.status(400).json({ error: 'Invalid phone number format' })
   }
 
 })
